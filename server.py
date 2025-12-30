@@ -1,79 +1,26 @@
 """
-Gmail MCP Server - Remote MCP server with Google OAuth and Gmail tools.
-
-This server provides Gmail functionality (send email) through the MCP protocol.
-Users authenticate via Google OAuth to access their Gmail account.
+Gmail MCP Server - Simplified Configuration.
 """
 
-import os
-from dotenv import load_dotenv
 from fastmcp import FastMCP
+import os
 
-# Load environment variables
-load_dotenv()
-
-# Check for required credentials
-client_id = os.environ.get("GOOGLE_CLIENT_ID")
-client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
-base_url = os.environ.get("BASE_URL", "http://localhost:8000")
-
-if client_id and client_secret:
-    # -------------------------------------------------------------------------
-    # AUTHENTICATION ENABLED
-    # -------------------------------------------------------------------------
-    try:
-        from fastmcp.server.auth.providers.google import GoogleProvider
-        
-        print(f"Starting with Google OAuth. Base URL: {base_url}")
-        
-        auth = GoogleProvider(
-            client_id=client_id,
-            client_secret=client_secret,
-            base_url=base_url,
-            required_scopes=[
-                "openid",
-                "https://www.googleapis.com/auth/userinfo.email",
-                "https://www.googleapis.com/auth/userinfo.profile",
-                "https://www.googleapis.com/auth/gmail.send",
-            ],
-        )
-        
-        mcp = FastMCP(
-            name="Gmail MCP Server",
-            auth=auth,
-            instructions="Authenticate with Google to use Gmail tools."
-        )
-        
-    except Exception as e:
-        print(f"Error initializing auth: {e}")
-        # Fallback to no-auth for diagnostics
-        mcp = FastMCP("Gmail Server (Auth Failed)")
-else:
-    # -------------------------------------------------------------------------
-    # AUTHENTICATION DISABLED (Diagnostics Mode)
-    # -------------------------------------------------------------------------
-    print("WARNING: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set.")
-    print("Starting in diagnostic mode without authentication.")
-    mcp = FastMCP("Gmail Server (No Auth)")
-
-# Import and register Gmail tools
-from gmail_tools import register_tools
-register_tools(mcp)
-
+# Create FastMCP server (No Auth for debugging)
+mcp = FastMCP("Gmail MCP Server")
 
 @mcp.tool
-def debug_status() -> dict:
-    """Check server status and environment configuration."""
+def debug_ping() -> str:
+    """Simple ping to verify server connectivity."""
+    return "Pong! Server is reachable."
+
+@mcp.tool
+def get_env_info() -> dict:
+    """Check environment variables."""
     return {
-        "status": "messaging_online",
-        "auth_enabled": bool(client_id and client_secret),
-        "base_url": base_url,
-        "env_check": {
-            "has_client_id": bool(client_id),
-            "has_client_secret": bool(client_secret)
-        }
+        "google_client_id_set": bool(os.environ.get("GOOGLE_CLIENT_ID")),
+        "base_url": os.environ.get("BASE_URL")
     }
 
 if __name__ == "__main__":
-    # Run with HTTP transport for remote access
+    # Default to HTTP host 0.0.0.0 for cloud compatibility
     mcp.run(transport="http", host="0.0.0.0", port=8000)
