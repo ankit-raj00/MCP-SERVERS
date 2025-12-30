@@ -11,7 +11,7 @@
         "requirements": "requirements.txt"
     },
     "deployment": {
-        "transport": "sse",
+        "transport": "http",
         "log_level": "DEBUG"
     }
 }
