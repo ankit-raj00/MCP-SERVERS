@@ -1,5 +1,5 @@
 """
-Gmail MCP Server - Production Safe
+Minimal MCP server — FastMCP hosted safe
 """
 import os
 from fastmcp import FastMCP
@@ -9,10 +9,6 @@ mcp = FastMCP("Gmail MCP Server")
 @mcp.tool
 def ping() -> str:
     return "Pong!"
-
-@mcp.route("/")
-def health():
-    return "ok"
 
 if __name__ == "__main__":
     PORT = int(os.environ.get("PORT", 8000))
