@@ -1,16 +1,16 @@
 """
-Gmail MCP Server - Connectivity Test.
+Gmail MCP Server - Remote MCP server (Minimal Test).
 """
 from fastmcp import FastMCP
 
-# Create a basic server - NO Auth, just to test connection
-mcp = FastMCP("Google MCP Test")
+# Create a minimal server for connectivity testing
+mcp = FastMCP("Gmail MCP Server (Test)")
 
 @mcp.tool
 def ping() -> str:
-    return "Pong from FastMCP Cloud!"
+    """Basic connectivity test."""
+    return "Pong! Server is live and reachable."
 
 if __name__ == "__main__":
-    # Ensure we bind to 0.0.0.0 for Cloud containers
-    # The timeout often happens if it defaults to 127.0.0.1
+    # Ensure transport is HTTP for Cloud deployment
     mcp.run(transport="http", host="0.0.0.0", port=8000)
